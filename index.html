@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnlimitedCommunity</title>
+    <style>
+        :root {
+            --theme-color: #4CAF50;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .title {
+            font-size: 2.5rem;
+            color: var(--theme-color);
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .announcement {
+            background: #f5f5f5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        .tab.active {
+            background: var(--theme-color);
+            color: white;
+        }
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 400px;
+        }
+        .release-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .download-btn {
+            background: var(--theme-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        #issues-container iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="title" id="site-title">Loading...</h1>
+        <div class="subtitle" id="site-subtitle"></div>
+    </header>
+    
+    <div class="announcement" id="site-announcement"></div>
+    
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('releases')">Resources</div>
+        <div class="tab" onclick="switchTab('discussions')">Discussions</div>
+    </div>
+    
+    <div class="content" id="content"></div>
+
+    <script>
+        let config = {};
+        
+        async function loadConfig() {
+            try {
+                const response = await fetch('config.json');
+                config = await response.json();
+                document.getElementById('site-title').textContent = config.title;
+                document.getElementById('site-subtitle').textContent = config.subtitle;
+                document.getElementById('site-announcement').textContent = config.announcement;
+                document.documentElement.style.setProperty('--theme-color', config.theme_color);
+                loadReleases();
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        async function loadReleases() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${config.github_repo}/releases`);
+                const releases = await response.json();
+                const content = document.getElementById('content');
+                content.innerHTML = releases.map(release => `
+                    <div class="release-item">
+                        <div>
+                            <h3>${release.name}</h3>
+                            <p>${release.body}</p>
+                        </div>
+                        <a href="https://ghproxy.com/${release.assets[0].browser_download_url}" class="download-btn">Download</a>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading releases:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (tab === 'releases') {
+                loadReleases();
+            } else if (tab === 'discussions') {
+                document.getElementById('content').innerHTML = `
+                    <div id="issues-container">
+                        <iframe src="https://github.com/${config.github_repo}/issues"></iframe>
+                    </div>
+                `;
+            }
+        }
+
+        loadConfig();
+    </script>
+</body>
+</html>
