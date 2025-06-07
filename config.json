@@ -1,7 +1,7 @@
 {
   "title": "UnlimitedCommunity",
-  "subtitle": "A GitHub-based community solution",
-  "announcement": "Welcome to our community!",
-  "github_repo": "ChKSz/ComeCommitCommunity",
-  "theme_color": "#4CAF50"
+  "subtitle": "一个基于GitHub的轻量级社区解决方案",
+  "announcement": "欢迎来到UnlimitedCommunity！在这里你可以找到最新资源、参与讨论。",
+  "github_repo": "your-username/your-repository",
+  "theme_color": "#28a745"
 }
